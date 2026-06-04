@@ -31,6 +31,11 @@ export struct QuickCommandPage {
       this.commands = this.commandManager.commands;
     });
     
+    // 监听设置变化
+    this.settingsManager.setOnSettingsChange(() => {
+      this.displayMode = this.settingsManager.displayMode;
+    });
+    
     // 加载历史数据
     this.serialDataHistory = this.bluetoothManager.serialDataHistory;
   }

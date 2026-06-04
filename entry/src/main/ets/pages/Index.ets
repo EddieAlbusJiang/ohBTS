@@ -26,15 +26,16 @@ struct Index {
     // 初始化蓝牙
     await this.bluetoothManager.initialize();
     
-    // 设置状态变化回调
+    // 立即同步当前状态
+    this.connectionState = this.bluetoothManager.connectionState;
+    this.connectedDevice = this.bluetoothManager.connectedDevice;
+    
+    // 设置状态变化回调 - 使用箭头函数确保this绑定正确
     this.bluetoothManager.setOnStateChange((state: ConnectionState, device: BluetoothDevice | null) => {
+      // 强制触发状态更新
       this.connectionState = state;
       this.connectedDevice = device;
     });
-    
-    // 初始化状态
-    this.connectionState = this.bluetoothManager.connectionState;
-    this.connectedDevice = this.bluetoothManager.connectedDevice;
   }
   
   build() {

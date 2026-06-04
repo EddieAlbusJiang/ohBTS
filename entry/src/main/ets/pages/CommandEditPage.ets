@@ -23,7 +23,22 @@ struct CommandEditPage {
     this.displayMode = this.settingsManager.displayMode;
     
     // 检查是否为编辑模式（通过路由参数传递）
-    // 注意：这里需要在实际使用时通过其他方式传递参数
+    try {
+      const params = router.getParams() as Record<string, Object>;
+      if (params && params['commandId']) {
+        const commandId = params['commandId'] as string;
+        const command = this.commandManager.getCommand(commandId);
+        if (command) {
+          this.isEditMode = true;
+          this.commandId = command.id;
+          this.commandName = command.name;
+          this.commandContent = command.content;
+          this.displayMode = command.displayMode;
+        }
+      }
+    } catch (error) {
+      console.error('Failed to get router params:', error);
+    }
   }
   
   build() {

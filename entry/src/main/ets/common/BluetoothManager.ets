@@ -21,10 +21,10 @@ export class BluetoothManager {
   // 串口数据记录
   private _serialDataHistory: SerialData[] = [];
   
-  // 回调函数
-  private onStateChange?: (state: ConnectionState, device: BluetoothDevice | null) => void;
-  private onDeviceDiscovered?: (device: BluetoothDevice) => void;
-  private onDataReceived?: (data: SerialData) => void;
+  // 回调函数 - 支持多个监听器
+  private onStateChangeCallbacks: Array<(state: ConnectionState, device: BluetoothDevice | null) => void> = [];
+  private onDeviceDiscoveredCallbacks: Array<(device: BluetoothDevice) => void> = [];
+  private onDataReceivedCallbacks: Array<(data: SerialData) => void> = [];
   
   private constructor() {}
   
@@ -56,17 +56,39 @@ export class BluetoothManager {
     return this._serialDataHistory;
   }
   
-  // Set callbacks
+  // 添加回调监听器
   setOnStateChange(callback: (state: ConnectionState, device: BluetoothDevice | null) => void) {
-    this.onStateChange = callback;
+    this.onStateChangeCallbacks.push(callback);
   }
   
   setOnDeviceDiscovered(callback: (device: BluetoothDevice) => void) {
-    this.onDeviceDiscovered = callback;
+    this.onDeviceDiscoveredCallbacks.push(callback);
   }
   
   setOnDataReceived(callback: (data: SerialData) => void) {
-    this.onDataReceived = callback;
+    this.onDataReceivedCallbacks.push(callback);
+  }
+  
+  // 移除回调监听器
+  removeOnStateChange(callback: (state: ConnectionState, device: BluetoothDevice | null) => void) {
+    const index = this.onStateChangeCallbacks.indexOf(callback);
+    if (index !== -1) {
+      this.onStateChangeCallbacks.splice(index, 1);
+    }
+  }
+  
+  removeOnDeviceDiscovered(callback: (device: BluetoothDevice) => void) {
+    const index = this.onDeviceDiscoveredCallbacks.indexOf(callback);
+    if (index !== -1) {
+      this.onDeviceDiscoveredCallbacks.splice(index, 1);
+    }
+  }
+  
+  removeOnDataReceived(callback: (data: SerialData) => void) {
+    const index = this.onDataReceivedCallbacks.indexOf(callback);
+    if (index !== -1) {
+      this.onDataReceivedCallbacks.splice(index, 1);
+    }
   }
   
   /**
@@ -112,9 +134,10 @@ export class BluetoothManager {
             const exists = this._discoveredDevices.find(d => d.deviceId === btDevice.deviceId);
             if (!exists) {
               this._discoveredDevices.push(btDevice);
-              if (this.onDeviceDiscovered) {
-                this.onDeviceDiscovered(btDevice);
-              }
+              // 通知所有监听器
+              this.onDeviceDiscoveredCallbacks.forEach(callback => {
+                callback(btDevice);
+              });
             }
           } catch (err) {
             console.error('Get device info failed:', err);
@@ -287,9 +310,10 @@ export class BluetoothManager {
         
         this._serialDataHistory.push(serialData);
         
-        if (this.onDataReceived) {
-          this.onDataReceived(serialData);
-        }
+        // 通知所有监听器
+        this.onDataReceivedCallbacks.forEach(callback => {
+          callback(serialData);
+        });
       });
     } catch (error) {
       console.error('Start data listener failed:', error);
@@ -300,9 +324,9 @@ export class BluetoothManager {
    * 通知状态变化
    */
   private notifyStateChange(): void {
-    if (this.onStateChange) {
-      this.onStateChange(this._connectionState, this._connectedDevice);
-    }
+    this.onStateChangeCallbacks.forEach(callback => {
+      callback(this._connectionState, this._connectedDevice);
+    });
   }
   
   /**

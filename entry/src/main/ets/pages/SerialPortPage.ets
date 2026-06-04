@@ -23,6 +23,11 @@ export struct SerialPortPage {
       this.serialDataHistory = [...this.bluetoothManager.serialDataHistory];
     });
     
+    // 监听设置变化
+    this.settingsManager.setOnSettingsChange(() => {
+      this.displayMode = this.settingsManager.displayMode;
+    });
+    
     // 加载历史数据
     this.serialDataHistory = this.bluetoothManager.serialDataHistory;
   }
