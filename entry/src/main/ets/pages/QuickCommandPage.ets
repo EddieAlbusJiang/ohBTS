@@ -16,6 +16,7 @@ export struct QuickCommandPage {
   private bluetoothManager: BluetoothManager = BluetoothManager.getInstance();
   private commandManager: CommandManager = CommandManager.getInstance();
   private settingsManager: SettingsManager = SettingsManager.getInstance();
+  private scroller: Scroller = new Scroller(); // 滚动控制器
   
   aboutToAppear() {
     // 加载指令
@@ -25,6 +26,12 @@ export struct QuickCommandPage {
     // 设置回调
     this.bluetoothManager.setOnDataReceived((data: SerialData) => {
       this.serialDataHistory = [...this.bluetoothManager.serialDataHistory];
+      // 自动滚动到底部
+      if (this.serialDataHistory.length > 0) {
+        setTimeout(() => {
+          this.scroller.scrollToIndex(this.serialDataHistory.length - 1);
+        }, 50);
+      }
     });
     
     this.commandManager.setOnCommandsChange(() => {
@@ -81,7 +88,7 @@ export struct QuickCommandPage {
       
       // 串口数据显示区域
       Column() {
-        List() {
+        List({ scroller: this.scroller }) {
           ForEach(this.serialDataHistory, (data: SerialData, index: number) => {
             ListItem() {
               this.SerialDataItem(data)
@@ -162,8 +169,8 @@ export struct QuickCommandPage {
         .fontColor('#333333')
         .layoutWeight(1)
       
-      Button('发送')
-        .width(60)
+      Button('发')
+        .width(48)
         .height(32)
         .fontSize(14)
         .backgroundColor('#007DFF')
@@ -171,12 +178,12 @@ export struct QuickCommandPage {
           this.sendCommand(command);
         })
       
-      Button('编辑')
-        .width(60)
+      Button('改')
+        .width(48)
         .height(32)
         .fontSize(14)
         .backgroundColor('#FF9900')
-        .margin({ left: 8 })
+        .margin({ left: 5 })
         .onClick(() => {
           router.pushUrl({
             url: 'pages/CommandEditPage',
@@ -184,18 +191,18 @@ export struct QuickCommandPage {
           });
         })
       
-      Button('删除')
-        .width(60)
+      Button('删')
+        .width(48)
         .height(32)
         .fontSize(14)
         .backgroundColor('#FF4444')
-        .margin({ left: 8 })
+        .margin({ left: 5 })
         .onClick(() => {
           this.deleteCommand(command.id);
         })
     }
     .width('100%')
-    .padding(16)
+    .padding(8)
     .backgroundColor(Color.White)
   }
   
@@ -254,6 +261,12 @@ export struct QuickCommandPage {
     const isHex = command.displayMode === DisplayMode.HEX;
     await this.bluetoothManager.sendData(command.content, isHex);
     this.serialDataHistory = [...this.bluetoothManager.serialDataHistory];
+    // 自动滚动到底部
+    if (this.serialDataHistory.length > 0) {
+      setTimeout(() => {
+        this.scroller.scrollToIndex(this.serialDataHistory.length - 1);
+      }, 50);
+    }
   }
   
   /**

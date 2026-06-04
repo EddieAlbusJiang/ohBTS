@@ -13,6 +13,7 @@ export struct SerialPortPage {
   
   private bluetoothManager: BluetoothManager = BluetoothManager.getInstance();
   private settingsManager: SettingsManager = SettingsManager.getInstance();
+  private scroller: Scroller = new Scroller(); // 滚动控制器
   
   aboutToAppear() {
     // 获取当前显示模式
@@ -21,6 +22,12 @@ export struct SerialPortPage {
     // 设置回调
     this.bluetoothManager.setOnDataReceived((data: SerialData) => {
       this.serialDataHistory = [...this.bluetoothManager.serialDataHistory];
+      // 自动滚动到底部
+      if (this.serialDataHistory.length > 0) {
+        setTimeout(() => {
+          this.scroller.scrollToIndex(this.serialDataHistory.length - 1);
+        }, 50);
+      }
     });
     
     // 监听设置变化
@@ -64,7 +71,7 @@ export struct SerialPortPage {
       
       // 串口数据显示区域 (60%)
       Column() {
-        List() {
+        List({ scroller: this.scroller }) {
           ForEach(this.serialDataHistory, (data: SerialData, index: number) => {
             ListItem() {
               this.SerialDataItem(data)
@@ -225,6 +232,12 @@ export struct SerialPortPage {
     if (success) {
       this.inputText = '';
       this.serialDataHistory = [...this.bluetoothManager.serialDataHistory];
+      // 自动滚动到底部
+      if (this.serialDataHistory.length > 0) {
+        setTimeout(() => {
+          this.scroller.scrollToIndex(this.serialDataHistory.length - 1);
+        }, 50);
+      }
     }
   }
   
