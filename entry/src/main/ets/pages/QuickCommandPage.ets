@@ -1,0 +1,281 @@
+import { QuickCommand, SerialData, DisplayMode } from '../common/Types';
+import { BluetoothManager } from '../common/BluetoothManager';
+import { CommandManager } from '../common/CommandManager';
+import { SettingsManager } from '../common/SettingsManager';
+import router from '@ohos.router';
+
+/**
+ * 快捷命令页面
+ */
+@Component
+export struct QuickCommandPage {
+  @State commands: QuickCommand[] = [];
+  @State serialDataHistory: SerialData[] = [];
+  @State displayMode: DisplayMode = DisplayMode.ASCII;
+  
+  private bluetoothManager: BluetoothManager = BluetoothManager.getInstance();
+  private commandManager: CommandManager = CommandManager.getInstance();
+  private settingsManager: SettingsManager = SettingsManager.getInstance();
+  
+  aboutToAppear() {
+    // 加载指令
+    this.commands = this.commandManager.commands;
+    this.displayMode = this.settingsManager.displayMode;
+    
+    // 设置回调
+    this.bluetoothManager.setOnDataReceived((data: SerialData) => {
+      this.serialDataHistory = [...this.bluetoothManager.serialDataHistory];
+    });
+    
+    this.commandManager.setOnCommandsChange(() => {
+      this.commands = this.commandManager.commands;
+    });
+    
+    // 加载历史数据
+    this.serialDataHistory = this.bluetoothManager.serialDataHistory;
+  }
+  
+  build() {
+    Column() {
+      // 顶部按钮栏
+      Row() {
+        Button() {
+          Text('清空')
+            .fontSize(14)
+            .fontColor('#007DFF')
+        }
+        .width(60)
+        .height(32)
+        .backgroundColor(Color.Transparent)
+        .onClick(() => {
+          this.clearHistory();
+        })
+        
+        Blank()
+          .layoutWeight(1)
+        
+        Button() {
+          Text('+')
+            .fontSize(20)
+            .fontColor('#FFFFFF')
+        }
+        .width(32)
+        .height(32)
+        .backgroundColor('#007DFF')
+        .borderRadius(16)
+        .onClick(() => {
+          router.pushUrl({
+            url: 'pages/CommandEditPage'
+          });
+        })
+      }
+      .width('100%')
+      .height(48)
+      .padding({ left: 16, right: 16 })
+      .backgroundColor(Color.White)
+      
+      // 串口数据显示区域
+      Column() {
+        List() {
+          ForEach(this.serialDataHistory, (data: SerialData, index: number) => {
+            ListItem() {
+              this.SerialDataItem(data)
+            }
+          }, (data: SerialData, index: number) => index.toString())
+        }
+        .width('100%')
+        .layoutWeight(1)
+      }
+      .width('100%')
+      .layoutWeight(1)
+      .backgroundColor('#1E1E1E')
+      .padding(8)
+      
+      Divider()
+      
+      // 快捷指令列表
+      Column() {
+        if (this.commands.length === 0) {
+          Text('暂无快捷指令')
+            .fontSize(14)
+            .fontColor('#999999')
+            .margin({ top: 20 })
+        } else {
+          List() {
+            ForEach(this.commands, (command: QuickCommand) => {
+              ListItem() {
+                this.CommandItem(command)
+              }
+            }, (command: QuickCommand) => command.id)
+          }
+          .width('100%')
+          .layoutWeight(1)
+        }
+      }
+      .width('100%')
+      .height(200)
+      .backgroundColor(Color.White)
+    }
+    .width('100%')
+    .height('100%')
+    .backgroundColor('#F5F5F5')
+  }
+  
+  /**
+   * 串口数据项
+   */
+  @Builder
+  SerialDataItem(data: SerialData) {
+    Row() {
+      Text(data.isSend ? 'TX' : 'RX')
+        .fontSize(12)
+        .fontColor(data.isSend ? '#00FF00' : '#00FFFF')
+        .width(30)
+      
+      Text(this.formatTimestamp(data.timestamp))
+        .fontSize(10)
+        .fontColor('#888888')
+        .width(80)
+      
+      Text(this.formatData(data))
+        .fontSize(12)
+        .fontColor('#FFFFFF')
+        .layoutWeight(1)
+    }
+    .width('100%')
+    .padding({ top: 4, bottom: 4 })
+  }
+  
+  /**
+   * 快捷指令项
+   */
+  @Builder
+  CommandItem(command: QuickCommand) {
+    Row() {
+      Text(command.name)
+        .fontSize(16)
+        .fontColor('#333333')
+        .layoutWeight(1)
+      
+      Button('发送')
+        .width(60)
+        .height(32)
+        .fontSize(14)
+        .backgroundColor('#007DFF')
+        .onClick(() => {
+          this.sendCommand(command);
+        })
+      
+      Button('编辑')
+        .width(60)
+        .height(32)
+        .fontSize(14)
+        .backgroundColor('#FF9900')
+        .margin({ left: 8 })
+        .onClick(() => {
+          router.pushUrl({
+            url: 'pages/CommandEditPage',
+            params: { commandId: command.id }
+          });
+        })
+      
+      Button('删除')
+        .width(60)
+        .height(32)
+        .fontSize(14)
+        .backgroundColor('#FF4444')
+        .margin({ left: 8 })
+        .onClick(() => {
+          this.deleteCommand(command.id);
+        })
+    }
+    .width('100%')
+    .padding(16)
+    .backgroundColor(Color.White)
+  }
+  
+  /**
+   * 格式化时间戳
+   */
+  private formatTimestamp(timestamp: number): string {
+    const date = new Date(timestamp);
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    const seconds = date.getSeconds().toString().padStart(2, '0');
+    return `${hours}:${minutes}:${seconds}`;
+  }
+  
+  /**
+   * 格式化数据
+   */
+  private formatData(data: SerialData): string {
+    if (this.displayMode === DisplayMode.HEX && data.displayMode === DisplayMode.ASCII) {
+      // ASCII转Hex显示
+      return this.asciiToHex(data.content);
+    } else if (this.displayMode === DisplayMode.ASCII && data.displayMode === DisplayMode.HEX) {
+      // Hex转ASCII显示
+      return this.hexToAscii(data.content);
+    }
+    return data.content;
+  }
+  
+  /**
+   * ASCII转Hex
+   */
+  private asciiToHex(str: string): string {
+    let hex = '';
+    for (let i = 0; i < str.length; i++) {
+      hex += str.charCodeAt(i).toString(16).padStart(2, '0').toUpperCase() + ' ';
+    }
+    return hex.trim();
+  }
+  
+  /**
+   * Hex转ASCII
+   */
+  private hexToAscii(hex: string): string {
+    const hexArray = hex.replace(/\s/g, '').match(/.{1,2}/g) || [];
+    let str = '';
+    for (const byte of hexArray) {
+      str += String.fromCharCode(parseInt(byte, 16));
+    }
+    return str;
+  }
+  
+  /**
+   * 发送指令
+   */
+  private async sendCommand(command: QuickCommand) {
+    const isHex = command.displayMode === DisplayMode.HEX;
+    await this.bluetoothManager.sendData(command.content, isHex);
+    this.serialDataHistory = [...this.bluetoothManager.serialDataHistory];
+  }
+  
+  /**
+   * 删除指令
+   */
+  private async deleteCommand(id: string) {
+    AlertDialog.show({
+      title: '确认删除',
+      message: '确定要删除这条指令吗？',
+      primaryButton: {
+        value: '取消',
+        action: () => {}
+      },
+      secondaryButton: {
+        value: '删除',
+        action: async () => {
+          await this.commandManager.deleteCommand(id);
+        }
+      }
+    });
+  }
+  
+  /**
+   * 清空历史
+   */
+  private clearHistory() {
+    this.bluetoothManager.clearDataHistory();
+    this.serialDataHistory = [];
+  }
+}
