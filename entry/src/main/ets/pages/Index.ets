@@ -38,6 +38,11 @@ struct Index {
     });
   }
   
+  onPageShow() {
+    // 从编辑页面返回时刷新指令列表
+    this.commandManager.notifyCommandsChange();
+  }
+  
   build() {
     Column() {
       // 顶部状态栏

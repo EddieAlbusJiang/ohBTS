@@ -33,6 +33,15 @@ export class CommandManager {
   }
   
   /**
+   * 通知指令变化（供外部主动触发刷新）
+   */
+  notifyCommandsChange() {
+    if (this.onCommandsChange) {
+      this.onCommandsChange();
+    }
+  }
+  
+  /**
    * 初始化
    */
   async initialize(context: Context): Promise<void> {

@@ -20,7 +20,10 @@ export struct QuickCommandPage {
   
   aboutToAppear() {
     // 加载指令
-    this.commands = this.commandManager.commands;
+    this.commands = this.commandManager.commands.map(cmd => {
+      let newCmd: QuickCommand = { id: cmd.id, name: cmd.name, content: cmd.content, displayMode: cmd.displayMode };
+      return newCmd;
+    });
     this.displayMode = this.settingsManager.displayMode;
     
     // 设置回调
@@ -35,7 +38,10 @@ export struct QuickCommandPage {
     });
     
     this.commandManager.setOnCommandsChange(() => {
-      this.commands = this.commandManager.commands;
+      this.commands = this.commandManager.commands.map(cmd => {
+        let newCmd: QuickCommand = { id: cmd.id, name: cmd.name, content: cmd.content, displayMode: cmd.displayMode };
+        return newCmd;
+      });
     });
     
     // 监听设置变化
@@ -46,6 +52,18 @@ export struct QuickCommandPage {
     // 加载历史数据
     this.serialDataHistory = this.bluetoothManager.serialDataHistory;
   }
+  
+  /**
+   * 页面每次显示时刷新命令列表
+   */
+  onPageShow() {
+    // 刷新命令列表，确保编辑后的内容能够更新
+    this.commands = this.commandManager.commands.map(cmd => {
+      let newCmd: QuickCommand = { id: cmd.id, name: cmd.name, content: cmd.content, displayMode: cmd.displayMode };
+      return newCmd;
+    });
+  }
+
   
   build() {
     Column() {
@@ -118,7 +136,7 @@ export struct QuickCommandPage {
               ListItem() {
                 this.CommandItem(command)
               }
-            }, (command: QuickCommand) => command.id)
+            }, (command: QuickCommand) => `${command.id}_${command.name}_${command.content}_${command.displayMode}`)
           }
           .width('100%')
           .layoutWeight(1)
