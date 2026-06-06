@@ -117,7 +117,7 @@ export struct QuickCommandPage {
         .layoutWeight(1)
       }
       .width('100%')
-      .layoutWeight(1)
+      .layoutWeight(6)
       .backgroundColor('#1E1E1E')
       .padding(8)
       
@@ -139,12 +139,12 @@ export struct QuickCommandPage {
             }, (command: QuickCommand) => `${command.id}_${command.name}_${command.content}_${command.displayMode}`)
           }
           .width('100%')
-          .layoutWeight(1)
         }
       }
       .width('100%')
       .height(200)
       .backgroundColor(Color.White)
+      .layoutWeight(4)
     }
     .width('100%')
     .height('100%')
@@ -160,13 +160,13 @@ export struct QuickCommandPage {
       Text(data.isSend ? 'TX' : 'RX')
         .fontSize(12)
         .fontColor(data.isSend ? '#00FF00' : '#00FFFF')
-        .width(30)
-      
+        .width(25).alignSelf(ItemAlign.Start)
+
       Text(this.formatTimestamp(data.timestamp))
-        .fontSize(10)
+        .fontSize(12)
         .fontColor('#888888')
-        .width(80)
-      
+        .width(90).alignSelf(ItemAlign.Start)
+
       Text(this.formatData(data))
         .fontSize(12)
         .fontColor('#FFFFFF')
@@ -232,7 +232,8 @@ export struct QuickCommandPage {
     const hours = date.getHours().toString().padStart(2, '0');
     const minutes = date.getMinutes().toString().padStart(2, '0');
     const seconds = date.getSeconds().toString().padStart(2, '0');
-    return `${hours}:${minutes}:${seconds}`;
+    const millis = date.getMilliseconds().toString().padStart(4, '0');
+    return `${hours}:${minutes}:${seconds}.${millis}`;
   }
   
   /**

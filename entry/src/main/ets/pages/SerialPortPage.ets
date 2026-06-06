@@ -37,6 +37,14 @@ export struct SerialPortPage {
     
     // 加载历史数据
     this.serialDataHistory = this.bluetoothManager.serialDataHistory;
+
+    // const serialDataWelcome: SerialData = {
+    //   content: "Welcome to Bluetooth Serial Command Window!",
+    //   isSend: true,
+    //   timestamp: Date.now(),
+    //   displayMode: DisplayMode.ASCII
+    // };
+    // this.serialDataHistory.push(serialDataWelcome);
   }
   
   build() {
@@ -90,44 +98,58 @@ export struct SerialPortPage {
       
       // 输入区域 (30%)
       Column() {
-        Text('输入指令')
-          .fontSize(14)
-          .fontColor('#999999')
-          .width('100%')
-          .margin({ bottom: 8 })
-        
+        Row(){
+          Text('输入指令')
+            .fontSize(14)
+            .fontColor('#999999')
+            .width(60)
+            .margin({ bottom: 8 })
+
+          Blank()
+            .layoutWeight(1)
+
+          Button('清空')
+            .width(60)
+            .height('100%')
+            .backgroundColor('#FF4444')
+            .fontColor(Color.White)
+            .fontSize(14)
+            // .alignSelf(ItemAlign.End)
+            .onClick(() => {
+              this.inputText = '';
+            })
+            .margin({bottom: 16})
+
+          Button('发送')
+            .width(60)
+            .height('100%')
+            .backgroundColor('#007DFF')
+            .fontColor(Color.White)
+            .fontSize(14)
+            // .alignSelf(ItemAlign.End)
+            .onClick(() => {
+              this.sendData();
+            })
+            .margin({left: 8, bottom: 16})
+
+            // .align(Alignment.End)
+        }
+        .height(35)
+
         TextArea({ placeholder: this.getInputPlaceholder(), text: this.inputText })
           .width('100%')
-          .layoutWeight(1)
           .backgroundColor('#F5F5F5')
           .borderRadius(4)
           .onChange((value: string) => {
             this.inputText = value;
-          })
+          }).layoutWeight(1)
       }
       .width('100%')
       .layoutWeight(3) // 30%
       .padding(16)
       .backgroundColor(Color.White)
       .alignItems(HorizontalAlign.Start)
-      
-      Divider()
-      
-      // 发送按钮
-      Row() {
-        Button('发送')
-          .width('100%')
-          .height(44)
-          .backgroundColor('#007DFF')
-          .fontColor(Color.White)
-          .fontSize(16)
-          .onClick(() => {
-            this.sendData();
-          })
-      }
-      .width('100%')
-      .padding(16)
-      .backgroundColor(Color.White)
+
     }
     .width('100%')
     .height('100%')
@@ -143,12 +165,12 @@ export struct SerialPortPage {
       Text(data.isSend ? 'TX' : 'RX')
         .fontSize(12)
         .fontColor(data.isSend ? '#00FF00' : '#00FFFF')
-        .width(30)
+        .width(25).alignSelf(ItemAlign.Start)
       
       Text(this.formatTimestamp(data.timestamp))
-        .fontSize(10)
+        .fontSize(12)
         .fontColor('#888888')
-        .width(80)
+        .width(90).alignSelf(ItemAlign.Start)
       
       Text(this.formatData(data))
         .fontSize(12)
@@ -178,7 +200,8 @@ export struct SerialPortPage {
     const hours = date.getHours().toString().padStart(2, '0');
     const minutes = date.getMinutes().toString().padStart(2, '0');
     const seconds = date.getSeconds().toString().padStart(2, '0');
-    return `${hours}:${minutes}:${seconds}`;
+    const millis = date.getMilliseconds().toString().padStart(4, '0');
+    return `${hours}:${minutes}:${seconds}.${millis}`;
   }
   
   /**
