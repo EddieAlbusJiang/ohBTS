@@ -1,14 +1,10 @@
 import { ConnectionState, BluetoothDevice } from '../common/Types';
-import router from '@ohos.router';
 
-/**
- * 顶部状态栏组件
- * 显示连接状态和设置按钮
- */
 @Component
 export struct StatusBar {
   @Prop connectionState: ConnectionState = ConnectionState.DISCONNECTED;
   @Prop connectedDevice: BluetoothDevice | null = null;
+  @Consume('pathStack') pathStack: NavPathStack;
   
   build() {
     Row() {
@@ -38,9 +34,7 @@ export struct StatusBar {
       .backgroundColor('#007DFF')
       .borderRadius(4)
       .onClick(() => {
-        router.pushUrl({
-          url: 'pages/SettingsPage'
-        });
+        this.pathStack.pushPathByName('SettingsPage', null);
       })
     }
     .width('100%')

@@ -43,4 +43,5 @@ export interface QuickCommand {
   name: string;
   content: string;
   displayMode: DisplayMode;
+  repeatCount: number;
 }

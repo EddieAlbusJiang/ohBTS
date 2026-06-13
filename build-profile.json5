@@ -5,28 +5,15 @@
         "name": "default",
         "type": "HarmonyOS",
         "material": {
-          "certpath": "C:/Users/Eddie/.ohos/config/default_RunningLambda_KkEKFf-dg9VUFXaafzzUEefqqnSW_sFaZ8j9O2De6zo=.cer",
+          "certpath": "C:\\Users\\Eddie\\.ohos\\config\\default_RunningLambda_KkEKFf-dg9VUFXaafzzUEefqqnSW_sFaZ8j9O2De6zo=.cer",
           "keyAlias": "debugKey",
-          "keyPassword": "0000001B6E0F7D5F47900988D580CFEB329A575BA47B2CCC8A4B3578FFD5E320D6DD4E87387B4AD920F449",
-          "profile": "C:/Users/Eddie/.ohos/config/default_RunningLambda_KkEKFf-dg9VUFXaafzzUEefqqnSW_sFaZ8j9O2De6zo=.p7b",
+          "keyPassword": "0000001B84A73782C410333463853A9F636617BCA2802A490223651A8A154E9D3926A67CC964256B04A836",
+          "profile": "C:\\Users\\Eddie\\.ohos\\config\\default_RunningLambda_KkEKFf-dg9VUFXaafzzUEefqqnSW_sFaZ8j9O2De6zo=.p7b",
           "signAlg": "SHA256withECDSA",
-          "storeFile": "C:/Users/Eddie/.ohos/config/default_RunningLambda_KkEKFf-dg9VUFXaafzzUEefqqnSW_sFaZ8j9O2De6zo=.p12",
-          "storePassword": "0000001BC59E94349639649A766E631D7B984E63CE93A71DE492CCB4CA695D79A74A7074A8ADD8FF6C2A3C"
+          "storeFile": "C:\\Users\\Eddie\\.ohos\\config\\default_RunningLambda_KkEKFf-dg9VUFXaafzzUEefqqnSW_sFaZ8j9O2De6zo=.p12",
+          "storePassword": "0000001BFA12952CEE713EDFC00C69C6DA615AF9B246B7B6CEB5B57C26A8695AE9F4B03494BD4658647512"
         }
       },
-      {
-        "name": "manageBt",
-        "type": "HarmonyOS",
-        "material": {
-          "certpath": "C:\\Users\\Eddie\\.ohos\\config\\manageBt_RunningLambda_KkEKFf-dg9VUFXaafzzUEefqqnSW_sFaZ8j9O2De6zo=.cer",
-          "keyAlias": "debugKey",
-          "keyPassword": "0000001BA34D53250DC5C0DA054B14A1B5B255547D0B90D8FB37F6E0D840AA7C464E378D3F892AEA7E8D6B",
-          "profile": "C:\\Users\\Eddie\\.ohos\\config\\manageBt_RunningLambda_KkEKFf-dg9VUFXaafzzUEefqqnSW_sFaZ8j9O2De6zo=.p7b",
-          "signAlg": "SHA256withECDSA",
-          "storeFile": "C:\\Users\\Eddie\\.ohos\\config\\manageBt_RunningLambda_KkEKFf-dg9VUFXaafzzUEefqqnSW_sFaZ8j9O2De6zo=.p12",
-          "storePassword": "0000001B11262D41E8E3BF9C6CCCA5802AE8F4BA2C02E746385DB1025DCA4ADB26202433CFCC4CDB362093"
-        }
-      }
     ],
     "products": [
       {

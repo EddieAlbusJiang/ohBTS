@@ -2,15 +2,15 @@
   "string": [
     {
       "name": "module_desc",
-      "value": "蓝牙遥控程序"
+      "value": "蓝牙串口程序"
     },
     {
       "name": "EntryAbility_desc",
-      "value": "蓝牙遥控主程序"
+      "value": "蓝牙串口主程序"
     },
     {
       "name": "EntryAbility_label",
-      "value": "蓝牙遥控"
+      "value": "蓝牙串口"
     },
     {
       "name": "bluetooth_reason",

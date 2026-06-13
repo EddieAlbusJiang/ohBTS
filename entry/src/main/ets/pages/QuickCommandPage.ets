@@ -2,7 +2,6 @@ import { QuickCommand, SerialData, DisplayMode } from '../common/Types';
 import { BluetoothManager } from '../common/BluetoothManager';
 import { CommandManager } from '../common/CommandManager';
 import { SettingsManager } from '../common/SettingsManager';
-import router from '@ohos.router';
 
 /**
  * 快捷命令页面
@@ -12,6 +11,7 @@ export struct QuickCommandPage {
   @State commands: QuickCommand[] = [];
   @State serialDataHistory: SerialData[] = [];
   @State displayMode: DisplayMode = DisplayMode.ASCII;
+  @Consume('pathStack') pathStack: NavPathStack;
   
   private bluetoothManager: BluetoothManager = BluetoothManager.getInstance();
   private commandManager: CommandManager = CommandManager.getInstance();
@@ -21,7 +21,11 @@ export struct QuickCommandPage {
   aboutToAppear() {
     // 加载指令
     this.commands = this.commandManager.commands.map(cmd => {
-      let newCmd: QuickCommand = { id: cmd.id, name: cmd.name, content: cmd.content, displayMode: cmd.displayMode };
+      let newCmd: QuickCommand = {
+        id: cmd.id, name: cmd.name, content: cmd.content,
+        displayMode: cmd.displayMode,
+        repeatCount: cmd.repeatCount ? cmd.repeatCount : 1
+      };
       return newCmd;
     });
     this.displayMode = this.settingsManager.displayMode;
@@ -39,7 +43,11 @@ export struct QuickCommandPage {
     
     this.commandManager.setOnCommandsChange(() => {
       this.commands = this.commandManager.commands.map(cmd => {
-        let newCmd: QuickCommand = { id: cmd.id, name: cmd.name, content: cmd.content, displayMode: cmd.displayMode };
+        let newCmd: QuickCommand = {
+          id: cmd.id, name: cmd.name, content: cmd.content,
+          displayMode: cmd.displayMode,
+          repeatCount: cmd.repeatCount ? cmd.repeatCount : 1
+        };
         return newCmd;
       });
     });
@@ -59,7 +67,11 @@ export struct QuickCommandPage {
   onPageShow() {
     // 刷新命令列表，确保编辑后的内容能够更新
     this.commands = this.commandManager.commands.map(cmd => {
-      let newCmd: QuickCommand = { id: cmd.id, name: cmd.name, content: cmd.content, displayMode: cmd.displayMode };
+      let newCmd: QuickCommand = {
+        id: cmd.id, name: cmd.name, content: cmd.content,
+        displayMode: cmd.displayMode,
+        repeatCount: cmd.repeatCount ? cmd.repeatCount : 1
+      };
       return newCmd;
     });
   }
@@ -94,9 +106,8 @@ export struct QuickCommandPage {
         .backgroundColor('#007DFF')
         .borderRadius(16)
         .onClick(() => {
-          router.pushUrl({
-            url: 'pages/CommandEditPage'
-          });
+          this.commandManager.setEditingCommandId('');
+          this.pathStack.pushPathByName('CommandEditPage', null);
         })
       }
       .width('100%')
@@ -136,7 +147,7 @@ export struct QuickCommandPage {
               ListItem() {
                 this.CommandItem(command)
               }
-            }, (command: QuickCommand) => `${command.id}_${command.name}_${command.content}_${command.displayMode}`)
+            }, (command: QuickCommand) => `${command.id}_${command.name}_${command.content}_${command.displayMode}_${command.repeatCount}`)
           }
           .width('100%')
         }
@@ -203,10 +214,8 @@ export struct QuickCommandPage {
         .backgroundColor('#FF9900')
         .margin({ left: 5 })
         .onClick(() => {
-          router.pushUrl({
-            url: 'pages/CommandEditPage',
-            params: { commandId: command.id }
-          });
+          this.commandManager.setEditingCommandId(command.id);
+          this.pathStack.pushPathByName('CommandEditPage', null);
         })
       
       Button('删')
@@ -278,14 +287,28 @@ export struct QuickCommandPage {
    */
   private async sendCommand(command: QuickCommand) {
     const isHex = command.displayMode === DisplayMode.HEX;
-    await this.bluetoothManager.sendData(command.content, isHex);
-    this.serialDataHistory = [...this.bluetoothManager.serialDataHistory];
-    // 自动滚动到底部
+    const count = command.repeatCount && command.repeatCount > 0 ? command.repeatCount : 1;
+    const interval = this.settingsManager.autoResendInterval;
+    
+    for (let i = 0; i < count; i++) {
+      if (i > 0) {
+        await this.delay(interval);
+      }
+      await this.bluetoothManager.sendData(command.content, isHex);
+      this.serialDataHistory = [...this.bluetoothManager.serialDataHistory];
+    }
+    
     if (this.serialDataHistory.length > 0) {
       setTimeout(() => {
         this.scroller.scrollToIndex(this.serialDataHistory.length - 1);
       }, 50);
     }
+  }
+  
+  private delay(ms: number): Promise<void> {
+    return new Promise<void>((resolve) => {
+      setTimeout(() => { resolve(); }, ms);
+    });
   }
   
   /**

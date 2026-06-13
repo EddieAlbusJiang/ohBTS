@@ -1,6 +1,6 @@
 {
   "app": {
-    "bundleName": "org.ETSF.RunningLambda",
+    "bundleName": "org.ETSF.btSerial",
     "vendor": "ETSF",
     "versionCode": 1000000,
     "versionName": "1.0.0",

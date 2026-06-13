@@ -10,6 +10,7 @@ export class CommandManager {
   
   private _commands: QuickCommand[] = [];
   private preferences: preferences.Preferences | null = null;
+  private _editingCommandId: string = '';
   
   // 回调
   private onCommandsChange?: () => void;
@@ -89,12 +90,13 @@ export class CommandManager {
   /**
    * 添加指令
    */
-  async addCommand(name: string, content: string, displayMode: DisplayMode): Promise<void> {
+  async addCommand(name: string, content: string, displayMode: DisplayMode, repeatCount: number): Promise<void> {
     const command: QuickCommand = {
       id: Date.now().toString(),
       name,
       content,
-      displayMode
+      displayMode,
+      repeatCount
     };
     
     this._commands.push(command);
@@ -108,14 +110,15 @@ export class CommandManager {
   /**
    * 更新指令
    */
-  async updateCommand(id: string, name: string, content: string, displayMode: DisplayMode): Promise<void> {
+  async updateCommand(id: string, name: string, content: string, displayMode: DisplayMode, repeatCount: number): Promise<void> {
     const index = this._commands.findIndex(cmd => cmd.id === id);
     if (index !== -1) {
       this._commands[index] = {
         id,
         name,
         content,
-        displayMode
+        displayMode,
+        repeatCount
       };
       
       await this.saveCommands();
@@ -143,5 +146,17 @@ export class CommandManager {
    */
   getCommand(id: string): QuickCommand | undefined {
     return this._commands.find(cmd => cmd.id === id);
+  }
+  
+  setEditingCommandId(id: string): void {
+    this._editingCommandId = id;
+  }
+  
+  getEditingCommandId(): string {
+    return this._editingCommandId;
+  }
+  
+  clearEditingCommandId(): void {
+    this._editingCommandId = '';
   }
 }
